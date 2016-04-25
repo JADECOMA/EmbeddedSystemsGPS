@@ -34,8 +34,10 @@ void Decoder::decode(char fileName[]) {
 
             if (correlationProduct / 1024 == 1) {
                 cout << "Satellite " << id << " has sent bit 1 (delta = " << delta << ")" << endl;
+                break;
             } else if (correlationProduct / 1024 == -1) {
                 cout << "Satellite " << id << " has sent bit 0 (delta = " << delta << ")" << endl;
+                break;
             }
             delta++;
         }
