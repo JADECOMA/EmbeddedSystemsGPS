@@ -4,17 +4,34 @@
 
 #include "Satellite.h"
 
+// Die Bitmasken resultieren aus den XOR-Verknüpfungen des Goldcode-Generators. Für deren Generierung werden nicht alle
+// Bits benötigt, daher werden nicht alle denkbaren Bitmasken definiert.
+
+// Bitmaske für Bit 1 (niederwertigstes Bit)
 #define BIT_1  (1 << 0)
+
+// Bitmaske für Bit 2
 #define BIT_2  (1 << 1)
+
+// Bitmaske für Bit 3
 #define BIT_3  (1 << 2)
+
+// Bitmaske für Bit 5
 #define BIT_5  (1 << 4)
+
+// Bitmaske für Bit 8
 #define BIT_8  (1 << 7)
+
+// Bitmaske für Bit 9
 #define BIT_9  (1 << 8)
 
+// Höchstes Bit
 #define HIGH_BIT 9
 
+// Initialwert der Schieberegister für die Generierung der Goldcodes
 #define INITIAL_VALUE 1023
 
+// Größe der Schieberegister
 #define REGISTER_WIDTH 10
 
 Satellite::Satellite() {
@@ -35,64 +52,122 @@ void Satellite::init() {
     this->createChipSequences();
 }
 
+/**
+ * Generierung der ersten Mutterfolge
+ */
 void Satellite::createMotherSequence1() {
+    // Laufvariable für alle Chips der Sequenz
     int i = 0;
+
+    // Das Bit, das als höchstwertiges Bit in das Schieberegister eingefügt werden soll.
     int newBit = 0;
+
+    // Aktueller Inhalt des Schiebereigsters
     int currentSequence = INITIAL_VALUE;
 
     while (i <= INITIAL_VALUE) {
+        // XOR-Verknüpfung des 1. mit dem 8. Bit des aktuellen Schiebregisterinhalts;
+        // Dieses Bit wird im Anschluss das neue höchstwertige Bit des Schieberegisters
         newBit = (currentSequence & BIT_1 ^ (currentSequence & BIT_8) >> 7);
+
+        // Das erste Bit des aktuellen Schieberegisters in die Mutterfolge einfügen
         motherSequence1[i++] = (currentSequence & BIT_1);
+
+        // Entfernen des ersten Bits aus dem Schieberegister
         currentSequence >>= 1;
+
+        // Setzen des höchsten Bits des Schieberegisters
         currentSequence |= (newBit << HIGH_BIT);
     }
 }
 
+/**
+ * Generierung der zweiten Mutterfolge
+ */
 void Satellite::createMotherSequence2() {
+    // Laufvariable für alle Chips der Sequenz
     int i = 0;
+
+    // Das Bit, das als höchstwertiges Bit in das Schieberegister eingefügt werden soll.
     int newBit = 0;
+
+    // Aktueller Inhalt des Schiebereigsters
     int currentSequence = INITIAL_VALUE;
 
     while (i <= INITIAL_VALUE) {
+        // Aktueller Zustand des Schieberegisters der zweiten Mutterfolge
         motherRegister2[i] = currentSequence;
+
+        // XOR-Verknüpfung des 1. mit dem 2., 4., 7. und 8. Bit des aktuellen Schiebregisterinhalts;
+        // Dieses Bit wird im Anschluss das neue höchstwertige Bit des Schieberegisters
         newBit = (currentSequence & BIT_1) ^
                   (currentSequence & BIT_2) >> 1 ^
                   (currentSequence & BIT_3) >> 2 ^
                   (currentSequence & BIT_5) >> 4 ^
                   (currentSequence & BIT_8) >> 7 ^
                   (currentSequence & BIT_9) >> 8;
+
+        // Das erste Bit des aktuellen Schieberegisters in die Mutterfolge einfügen
         motherSequence2[i] = currentSequence & BIT_1;
+
+        // Entfernen des ersten Bits aus dem Schieberegister
         currentSequence >>= 1;
+
+        // Setzen des höchsten Bits des Schieberegisters
         currentSequence |= (newBit << HIGH_BIT);
         i++;
     }
 }
 
+/**
+ * Generierung der Chipsequenzen
+ */
 void Satellite::createChipSequences() {
+    // ID des Satelliten
     int id = 0;
+
+    // Laufvariable für die Chipsequenzen
     int i = 0;
 
-    int registerResult = 0;
+    // Jeder Satellit hat zwei spezifische Bits, die XOR-verknüpft werden um die individuelle Chipsequenz zu erzeugen
+    // niedrigeres Register der zweiten Mutterfolge das XOR verknüpft werden soll
     int firstRegister = 0;
+    // höheres Register der zweiten Mutterfolge das XOR verknüpft werden soll
     int secondRegister = 0;
+
+    // Bit, das aus der XOR-Verknüpfung der zwei Bits der zweiten Mutterfolge resultiert
+    int registerResult = 0;
+
+    // einzutragendes Bit der Goldfolge
     int fillBit = 0;
 
+    // Itterieren über alle Satelliten
     while (id < 24) {
         for (i = 0; i <= INITIAL_VALUE; i++) {
+            // niedrigeres Bit aus der zweiten Mutterfolge extrahieren
             firstRegister = (1 << satelliteRegisters[id][0]);
+            // höheres Bit aus der zweiten Mutterfolge extrahieren
             secondRegister = (1 << satelliteRegisters[id][1]);
 
+            // extrahierte Bits XOR-Verknüpfen
             registerResult = (motherRegister2[i] & firstRegister) >> satelliteRegisters[id][0] ^
                              (motherRegister2[i] & secondRegister) >> satelliteRegisters[id][1];
 
+            // Resultat der Verknüpfung der zweiten Mutterfolge XOR verknüpfen mit dem ersten Bit der ersten Mutterfolge
             fillBit = ((motherSequence1[i] ^ registerResult) == 0) ? -1 : 1;
+
+            // 1 oder -1 in die Chipsequenz eines Satelliten einfügen
             chipSequences[id][i] = fillBit;
         }
         id++;
     }
 }
 
-
+/**
+ * Konstantentabelle.
+ * Zur Generierung des Goldcodes werden pro Satellit zwei spezifische (konstante) Bits XOR-verknüpft. Diese sind
+ * aufgrund der Literatur gegeben und werden hier übernommen.
+ */
 void Satellite::initSatelliteRegisters() {
     satelliteRegisters[0][0] = REGISTER_WIDTH - 2;
     satelliteRegisters[0][1] = REGISTER_WIDTH - 6;

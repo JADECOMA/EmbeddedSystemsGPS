@@ -10,12 +10,22 @@ SumSignal::SumSignal(char fileName[]) {
 
 SumSignal::~SumSignal() { }
 
+/**
+ * Einlesen einer Datei mit Summensignal
+ */
 void SumSignal::readFile(char fileName[]) {
+    // Pointer auf eine Date
     FILE *file;
+
+    // aktuell auszulesender Wert
     int number = 0;
+
+    // Laufvariable
     int i = 0;
 
+
     if (fileName != NULL) {
+        // Datei einlesen
         try {
             file = fopen(fileName, "r");
         } catch (int e) {
@@ -23,6 +33,7 @@ void SumSignal::readFile(char fileName[]) {
             cout << e;
         }
 
+        // Über den Dateiinhalt itterieren und Leerzeichen getrennte Werte in das Summensignal-Array schreiben
         while (fscanf(file, "%d ", &number) != EOF) {
             sumSignal[i++] = number;
         }
