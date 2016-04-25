@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     for (i = 1; i < 31; i++) {
         //decoder->decode(argv[1]);
 
-        file = string("C:\\Users\\Manuel\\ClionProjects\\EmbeddedSystemsGPS\\gps_sequence_") + string(to_string(i)) + string(".txt");
+        file = string("C:\\Users\\Manuel\\ClionProjects\\EmbeddedSystemsGPS\\testFiles\\gps_sequence_") + string(to_string(i)) + string(".txt");
         strncpy(fileName, file.c_str(), sizeof(fileName));
         cout << fileName << endl;
         decoder->decode(fileName);
