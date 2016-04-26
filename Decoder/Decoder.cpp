@@ -6,6 +6,8 @@
 #include "../Satellite/Satellite.h"
 #include "../SumSignal/SumSignal.h"
 
+#define DELAY 200
+
 Decoder::Decoder() { }
 
 Decoder::~Decoder() { }
@@ -54,20 +56,23 @@ void Decoder::decode(char fileName[]) {
                 i++;
             }
 
+            //cout << correlationProduct << "\t";
+
             // Konnte ein Peak im Korrelationsprodukt festgestellt werden, wird dies hier ausgegeben.
             // Mathematischer Hintergrund: Wird ein Summensignal mit einer Chipsequenz kreuzkorreliert, so ist das
             //                             Ergebnis in normalisierter Form == 1 oder == -1 falls eine Übereinstimmung
             //                             vorhanden ist.
-            if (correlationProduct / 1024 == 1) {
-                cout << "Satellite " << id << " has sent bit 1 (delta = " << delta << ")" << endl;
+            if (correlationProduct / (1024 - DELAY) >= 1) {
+                cout << "Satellite " << (id + 1) << " has sent bit 1 (delta = " << delta << ")" << endl;
                 break;
-            } else if (correlationProduct / 1024 == -1) {
-                cout << "Satellite " << id << " has sent bit 0 (delta = " << delta << ")" << endl;
+            } else if (correlationProduct / (1024 - DELAY) <= -1) {
+                cout << "Satellite " << (id + 1) << " has sent bit 0 (delta = " << delta << ")" << endl;
                 break;
             }
             delta++;
         }
         id++;
+
     }
 
     delete sSignal;
