@@ -6,7 +6,7 @@
 #include "../Satellite/Satellite.h"
 #include "../SumSignal/SumSignal.h"
 
-#define DELAY 200
+#define DELAY 293
 
 Decoder::Decoder() { }
 
@@ -55,8 +55,6 @@ void Decoder::decode(char fileName[]) {
                 correlationProduct += sumSignal[i] * (chipSequences[0][id][(i + delta) % 1023]);
                 i++;
             }
-
-            //cout << correlationProduct << "\t";
 
             // Konnte ein Peak im Korrelationsprodukt festgestellt werden, wird dies hier ausgegeben.
             // Mathematischer Hintergrund: Wird ein Summensignal mit einer Chipsequenz kreuzkorreliert, so ist das
