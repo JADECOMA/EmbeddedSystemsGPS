@@ -6,7 +6,7 @@
 #include "../Satellite/Satellite.h"
 #include "../SumSignal/SumSignal.h"
 
-#define DELAY 293
+#define DELAY 3 * 65
 
 Decoder::Decoder() { }
 
